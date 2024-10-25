@@ -1,6 +1,7 @@
 # docker-verify-BIRDS
 
 BIRDS の verification 処理を開発するための docker 環境。
+`-it` オプションでコンテナに接続して使うことを想定しています。
 
 
 ### How to use
@@ -8,7 +9,10 @@ BIRDS の verification 処理を開発するための docker 環境。
 ```bash
 $ docker pull cedretaber/vebirds
 
-$ docker run --rm -it -v path/to/BIRDS:/birds cedretaber/vebirds bash
+$ docker run --rm -it -v ${BIRDSへのパスに置き換えてください}:/birds cedretaber/vebirds bash
+
+# コンテナの中
+$ cd /birds
 ```
 
 

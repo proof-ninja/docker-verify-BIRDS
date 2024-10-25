@@ -14,23 +14,6 @@ RUN apt update && apt install -y locales \
   && rm -rf /var/lib/apt/lists/*
 
 
-# installing OCaml
-WORKDIR /root/
-RUN BUILD_PKGS="wget build-essential git make m4 curl unzip" \
-  && RUNTIME_PKGS="" \
-  && apt update && apt install -y ${BUILD_PKGS} ${RUNTIME_PKGS} \
-  && echo "/usr/bin" | bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)" \
-  && wget http://security.ubuntu.com/ubuntu/pool/main/b/bubblewrap/bubblewrap_0.2.1-1ubuntu0.1_amd64.deb \
-  && dpkg -i bubblewrap_0.2.1-1ubuntu0.1_amd64.deb \
-  && rm bubblewrap_0.2.1-1ubuntu0.1_amd64.deb \
-  && opam init --disable-sandboxing \
-  && eval `opam config env` \
-  && opam switch create ${OCAML_VERSION} \
-  && opam install -y num \
-  && apt purge -y --auto-remove ${BUILD_PKGS} \
-  && rm -rf /var/lib/apt/lists/*
-
-
 # installing Lean and Z3
 WORKDIR /root/
 RUN BUILD_PKGS="wget unzip" \
@@ -52,6 +35,23 @@ RUN BUILD_PKGS="wget unzip" \
   && rm -rf /var/lib/apt/lists/*
 
 
+# installing lean libs for birds
+WORKDIR /root/
+RUN BUILD_PKGS="git" \
+  && RUNTIME_PKGS="" \
+  && apt update && apt install -y ${BUILD_PKGS} ${RUNTIME_PKGS} \
+  && git clone https://github.com/dangtv/BIRDS.git \
+  && mv /root/BIRDS/ /usr/lib/birds/ \
+  && cd /usr/lib/birds/verification \
+  && leanpkg configure \
+  && cd /usr/lib/birds/verification/_target/deps/mathlib/ && leanpkg configure && leanpkg build -- --threads=1 \
+  && cd /usr/lib/birds/verification/_target/deps/super/ && leanpkg configure && leanpkg build \
+  && cd /usr/lib/birds/verification/ && leanpkg build \
+  && mkdir /root/.lean/ && cp /usr/lib/birds/docker/ubuntu/config/lean/leanpkg.path /root/.lean/ \
+  && apt purge -y --auto-remove ${BUILD_PKGS} \
+  && rm -rf /var/lib/apt/lists/*
+
+
 # install racket and rosette
 WORKDIR /root/
 RUN BUILD_PKGS="wget libgtk2.0" \
@@ -67,19 +67,20 @@ RUN BUILD_PKGS="wget libgtk2.0" \
   && rm -rf /var/lib/apt/lists/*
 
 
-# installing lean libs for birds
+# installing OCaml and dune
 WORKDIR /root/
-RUN BUILD_PKGS="git" \
-  && RUNTIME_PKGS="" \
+RUN BUILD_PKGS="" \
+  && RUNTIME_PKGS="wget build-essential git make m4 curl unzip" \
   && apt update && apt install -y ${BUILD_PKGS} ${RUNTIME_PKGS} \
-  && git clone https://github.com/dangtv/BIRDS.git \
-  && mv /root/BIRDS/ /usr/lib/birds/ \
-  && cd /usr/lib/birds/verification \
-  && leanpkg configure \
-  && cd /usr/lib/birds/verification/_target/deps/mathlib/ && leanpkg configure && leanpkg build -- --threads=1 \
-  && cd /usr/lib/birds/verification/_target/deps/super/ && leanpkg configure && leanpkg build \
-  && cd /usr/lib/birds/verification/ && leanpkg build \
-  && mkdir /root/.lean/ && cp /usr/lib/birds/docker/ubuntu/config/lean/leanpkg.path /root/.lean/ \
+  && echo "/usr/bin" | bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)" \
+  && wget http://security.ubuntu.com/ubuntu/pool/main/b/bubblewrap/bubblewrap_0.2.1-1ubuntu0.1_amd64.deb \
+  && dpkg -i bubblewrap_0.2.1-1ubuntu0.1_amd64.deb \
+  && rm bubblewrap_0.2.1-1ubuntu0.1_amd64.deb \
+  && opam init --disable-sandboxing \
+  && eval `opam config env` \
+  && echo 'eval `opam config env`' >> /root/.bashrc \
+  && opam switch create ${OCAML_VERSION} \
+  && opam install -y num ocamlgraph menhir dune \
   && apt purge -y --auto-remove ${BUILD_PKGS} \
   && rm -rf /var/lib/apt/lists/*
 
