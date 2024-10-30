@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM --platform=linux/amd64 ubuntu:24.04
 
 ENV OS_LOCALE="en_US.UTF-8" \
     LANG=${OS_LOCALE} \
