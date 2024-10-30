@@ -18,6 +18,8 @@ $ cd /birds
 
 ### How to build
 
+CPU が Apple silicon の場合は、 Docker のオプションで `Use Rosetta for x86_64/amd64 emulation on Apple Silicon` を無効にしてください（ Rosetta が有効だとビルドが失敗します）。
+
 ```bash
 $ docker build -t vebirds .
 ```
